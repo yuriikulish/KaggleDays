@@ -6,9 +6,10 @@ Created on Sun Feb 24 11:41:35 2019
 """
 
 from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import  TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle
 import pandas as pd
+
 
 def create_tsvd_feats():
     # ToDo: add correct field
@@ -16,10 +17,10 @@ def create_tsvd_feats():
     test_df = pd.read_csv('data/test.csv')
 
     tfv = TfidfVectorizer(min_df=1,  max_features=None, 
-                strip_accents='unicode', analyzer='word',token_pattern=r'\w+',
-                ngram_range=(1, 3), use_idf=1,smooth_idf=1,sublinear_tf=1)
+                          strip_accents='unicode', analyzer='word', token_pattern=r'\w+',
+                          ngram_range=(1, 3), use_idf=1, smooth_idf=1, sublinear_tf=1)
     
-    tfv.fit(pd.concat([train_df["en_US_description"],test_df["en_US_description"]],0))
+    tfv.fit(pd.concat([train_df["en_US_description"], test_df["en_US_description"]], 0))
     vectors_train = tfv.transform(train_df["en_US_description"])
     vectors_test = tfv.transform(test_df["en_US_description"])
     print("TF IDF completed")
@@ -28,5 +29,5 @@ def create_tsvd_feats():
     tsvd_vecs_train = tsvd.fit_transform(vectors_train)
     tsvd_vecs_test = tsvd.transform(vectors_test)
     
-    with open("features/tsvd_feats.pickle","wb") as f:
-        pickle.dump((tsvd_vecs_train, tsvd_vecs_test),f)
+    with open("features/tsvd_feats.pickle", "wb") as f:
+        pickle.dump((tsvd_vecs_train, tsvd_vecs_test), f)

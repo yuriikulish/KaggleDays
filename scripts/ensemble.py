@@ -14,7 +14,4 @@ subm3 = pd.read_csv("./submissions/subm_m2.csv")
 average_subm = subm1.copy()
 average_subm["target"] = subm1["target"]*0.4 + subm2["target"]*0.3 + subm3["target"]*0.3
 
-average_subm[["ID","target"]].to_csv("submissions/ensemble.csv", index = False)
-
-
-
+average_subm[["ID", "target"]].to_csv("submissions/ensemble.csv", index=False)

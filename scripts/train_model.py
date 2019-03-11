@@ -11,6 +11,7 @@ import pandas as pd
 import pickle
 import numpy as np
 
+
 def train_model(params, features, folds, ds_train):
     lgb_rounds = lgb.cv(params, ds_train, num_boost_round = 3000, folds=folds,
                     stratified = False,
@@ -21,7 +22,8 @@ def train_model(params, features, folds, ds_train):
     lgb_model = lgb.train(params, ds_train, num_boost_round=len(lgb_rounds))
     return lgb_model
 
-def oof_train(params, features, month, target = 'target_log'):
+
+def oof_train(params, features, month, target='target_log'):
     train = pd.read_csv('features/train.csv')
     test = pd.read_csv('features/test.csv')
     features = [y for y in features if y!="month"]
@@ -30,7 +32,7 @@ def oof_train(params, features, month, target = 'target_log'):
     folds_first.columns = ["index","fold"]
     folds_first.index = folds_first["index"]
 
-    train1 = train[train["month"]==month]
+    train1 = train[train["month"] == month]
     train1["oof"] = 0
     train1['target_log'] = np.log1p(train['target'])
 
@@ -39,8 +41,8 @@ def oof_train(params, features, month, target = 'target_log'):
 
     outer_folds_first = []
     for i in range(5):
-        train_idx = folds_first[folds_first['fold']!=i].index.tolist()
-        test_idx = folds_first[folds_first['fold']==i].index.tolist()
+        train_idx = folds_first[folds_first['fold'] != i].index.tolist()
+        test_idx = folds_first[folds_first['fold'] == i].index.tolist()
         outer_folds_first.append((train_idx, test_idx))
     
     for train_idx, test_idx in outer_folds_first:
@@ -49,18 +51,18 @@ def oof_train(params, features, month, target = 'target_log'):
     
         lgb_model = lgb.train(params, ds_fold_train, num_boost_round=500)
     
-        y_predict  = lgb_model.predict(train1.loc[test_idx][features])
-        y_predict_train  = lgb_model.predict(train1.loc[train_idx][features])
+        y_predict = lgb_model.predict(train1.loc[test_idx][features])
+        y_predict_train = lgb_model.predict(train1.loc[train_idx][features])
     
         print("Valid error {}".format(mean_squared_error(list(train1.loc[test_idx][target].values), y_predict)))
         print("Train error {}".format(mean_squared_error(list(train1.loc[train_idx][target].values), y_predict_train)))
         
-        train1.loc[test_idx,"oof"] = y_predict
+        train1.loc[test_idx, "oof"] = y_predict
         pred_test.append(lgb_model.predict(test[features]))
         i += 1
         train1["month"] = month
         
-    with open("test_preds{}".format(str(month)),"wb") as f:
-        pickle.dump(sum(pred_test)/5,f)
+    with open("test_preds{}".format(str(month)), "wb") as f:
+        pickle.dump(sum(pred_test)/5, f)
 
     return train1

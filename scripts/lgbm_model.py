@@ -15,7 +15,8 @@ from model_params import params, params2
 from tsvd_feats import create_tsvd_feats
 from oof_prediction import add_test_oof
 
-def load_train_test(oof = False, tfidf_svd = True, target = 'target_log', knn_feats = False):
+
+def load_train_test(oof = False, tfidf_svd = True, target='target_log', knn_feats=False):
     features = pickle.load(open('features/features.pkl','rb'))
 
     if knn_feats == True:
@@ -74,25 +75,23 @@ def load_train_test(oof = False, tfidf_svd = True, target = 'target_log', knn_fe
 train, ds_train,test, test_svd, outer_folds, train_svd, features = load_train_test(oof = False, tfidf_svd = True)
 
 lgb_rounds = lgb.cv(params2, ds_train, num_boost_round = 3000, folds=outer_folds,
-                    stratified = False,
-            early_stopping_rounds = 100, verbose_eval=True)
+                    stratified = False, early_stopping_rounds = 100, verbose_eval=True)
 print(lgb_rounds['rmse-mean'][-1], len(lgb_rounds['rmse-mean']))
 lgb_model = lgb.train(params2, ds_train, num_boost_round=len(lgb_rounds['rmse-mean']))
 train["prds"]  = lgb_model.predict(train_svd[features])
 print(mean_squared_error(train["prds"],np.log1p(train['target'])))
 
-y_predict  = lgb_model.predict(test_svd[features])
+y_predict = lgb_model.predict(test_svd[features])
 test['target'] = np.expm1(y_predict)
 
-test[['ID','target']].to_csv('submissions/subm_m1.csv', index=False, header=True)
+test[['ID', 'target']].to_csv('submissions/subm_m1.csv', index=False, header=True)
 
 ##################################### Model 2 #####################################
 
-train, ds_train,test, test_svd, outer_folds, train_svd, features = load_train_test(oof = True, tfidf_svd = True)
+train, ds_train,test, test_svd, outer_folds, train_svd, features = load_train_test(oof=True, tfidf_svd=True)
 
 lgb_rounds = lgb.cv(params, ds_train, num_boost_round = 3000, folds=outer_folds,
-                    stratified = False,
-            early_stopping_rounds = 100, verbose_eval=True)
+                    stratified = False, early_stopping_rounds = 100, verbose_eval=True)
 print(lgb_rounds['rmse-mean'][-1], len(lgb_rounds['rmse-mean']))
 lgb_model = lgb.train(params2, ds_train, num_boost_round=len(lgb_rounds['rmse-mean']))
 train["prds"]  = lgb_model.predict(train_svd[features])
@@ -105,18 +104,16 @@ test[['ID','target']].to_csv('submissions/subm_m2.csv', index=False, header=True
 
 ##################################### Model 3 #####################################
 
-train, ds_train,test, test_svd, outer_folds, train_svd, features = load_train_test(oof = True, tfidf_svd = True, knn_feats = True)
+train, ds_train,test, test_svd, outer_folds, train_svd, features = load_train_test(oof = True, tfidf_svd=True, knn_feats=True)
 
-lgb_rounds = lgb.cv(params, ds_train, num_boost_round = 3000, folds=outer_folds,
-                    stratified = False,
-            early_stopping_rounds = 100, verbose_eval=True)
+lgb_rounds = lgb.cv(params, ds_train, num_boost_round=3000, folds=outer_folds,
+                    stratified=False, early_stopping_rounds=100, verbose_eval=True)
 print(lgb_rounds['rmse-mean'][-1], len(lgb_rounds['rmse-mean']))
 lgb_model = lgb.train(params2, ds_train, num_boost_round=len(lgb_rounds['rmse-mean']))
-train["prds"]  = lgb_model.predict(train_svd[features])
+train["prds"] = lgb_model.predict(train_svd[features])
 print(mean_squared_error(train["prds"],np.log1p(train['target'])))
 
-y_predict  = lgb_model.predict(test_svd[features])
+y_predict = lgb_model.predict(test_svd[features])
 test['target'] = np.expm1(y_predict)
 
-test[['ID','target']].to_csv('submissions/subm_m3.csv', index=False, header=True)
-
+test[['ID', 'target']].to_csv('submissions/subm_m3.csv', index=False, header=True)

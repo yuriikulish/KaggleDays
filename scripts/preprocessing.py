@@ -33,7 +33,7 @@ df_train_test = df_train.append(df_test)
 # Sum per zone
 sales_per_zone = df_sales[['sku_hash', 'zone_number', 'sales_quantity']].\
                 groupby(['sku_hash', 'zone_number']).sum().reset_index()
-sales_pivot = sales_per_zone.pivot(index='sku_hash',columns='zone_number',values='sales_quantity')
+sales_pivot = sales_per_zone.pivot(index='sku_hash', columns='zone_number', values='sales_quantity')
 sales_pivot = sales_pivot.fillna(0)
 sales_pivot.columns = ['sum_sales_per_zone_{}'.format(i+1) for i in range(5)]
 sales_features.extend(list(sales_pivot.columns))
@@ -43,7 +43,7 @@ df_train_test = df_train_test.merge(sales_pivot, how='left', on='sku_hash')
 # Sum per country
 sales_per_country = df_sales[['sku_hash', 'country_number', 'sales_quantity']].\
                 groupby(['sku_hash', 'country_number']).sum().reset_index()
-sales_pivot = sales_per_country.pivot(index='sku_hash',columns='country_number',values='sales_quantity')
+sales_pivot = sales_per_country.pivot(index='sku_hash', columns='country_number', values='sales_quantity')
 sales_pivot = sales_pivot.fillna(0)
 sales_pivot.columns = ['sum_sales_per_country_{}'.format(i) for i in sales_pivot.columns]
 sales_features.extend(list(sales_pivot.columns))
@@ -54,17 +54,17 @@ df_train_test = df_train_test.merge(sales_pivot, how='left', on='sku_hash')
 # Sum per day
 sales_per_day = df_sales[['sku_hash', 'Date', 'sales_quantity']].\
                 groupby(['sku_hash', 'Date']).sum().reset_index()
-sales_pivot = sales_per_day.pivot(index='sku_hash',columns='Date',values='sales_quantity')
+sales_pivot = sales_per_day.pivot(index='sku_hash', columns='Date', values='sales_quantity')
 sales_pivot = sales_pivot.fillna(0)
 sales_pivot.columns = ['sum_sales_per_{}'.format(i).lower() for i in sales_pivot.columns]
 sales_features.extend(list(sales_pivot.columns))
 sales_pivot = sales_pivot.reset_index()
 df_train_test = df_train_test.merge(sales_pivot, how='left', on='sku_hash')
 
-# Sum per day neighboor
+# Sum per day neighbour
 sales_per_day_neigh = df_sales[['sku_hash', 'Date', 'sales_quantity']].\
                 groupby(['sku_hash', 'Date']).sum().reset_index()
-sales_pivot_neigh = sales_per_day.pivot(index='sku_hash',columns='Date',values='sales_quantity')
+sales_pivot_neigh = sales_per_day.pivot(index='sku_hash', columns='Date', values='sales_quantity')
 sales_pivot_neigh = sales_pivot.fillna(0)
 sales_pivot_neigh.columns = ["sku_hash"] + ['sum_sales_neighb_per_{}'.format(i).lower() \
                              for i in sales_pivot_neigh.columns if i!="sku_hash"]
@@ -104,7 +104,7 @@ sku_launch_day.columns = ['sku_hash', 'launch_month', 'launch_dow']
 df_train_test = df_train_test.merge(sku_launch_day, how='left', on='sku_hash')
 sales_features.extend(['launch_month', 'launch_dow'])
 
-# Total buzz per day
+# Total impression 6 day before launch per day
 totalbuzz_per_day = df_sales[['sku_hash', 'Date', 'Impressions_6_day_before']].\
                 groupby(['sku_hash', 'Date']).sum().reset_index()
 sales_pivot = totalbuzz_per_day.pivot(index='sku_hash',columns='Date',values='Impressions_6_day_before')
@@ -124,7 +124,7 @@ sales_features.extend(list(sales_pivot.columns))
 sales_pivot = sales_pivot.reset_index()
 df_train_test = df_train_test.merge(sales_pivot, how='left', on='sku_hash')
 
-# Total impression per day
+# Total net sentiment per day
 NetSentiment_per_day = df_sales[['sku_hash', 'Date', 'NetSentiment']].\
                 groupby(['sku_hash', 'Date']).sum().reset_index()
 sales_pivot = NetSentiment_per_day.pivot(index='sku_hash',columns='Date',values='NetSentiment')
@@ -173,13 +173,4 @@ new_test.to_csv('features/test.csv', index=False, header=True)
 
 oof_prediction(features)
 
-
 pickle.dump(features, open('features/features.pkl','wb'))
-
-###############################
-
-####### knn_feats
-
-
-
-
